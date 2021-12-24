@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import './screens/news_screen.dart';
+import './screens/log_in_screen.dart';
 
 void main() => runApp(const MyApp());
 
@@ -9,8 +9,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: NewsScreen(),
+    return const MaterialApp(
+      home: LogInScreen(),
     );
   }
 }

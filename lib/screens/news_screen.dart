@@ -1,37 +1,79 @@
 import 'package:flutter/material.dart';
 
 import '../models/news.dart';
-// import '../services/get_news.dart';
+import '../services/get_news.dart';
+import './online_news.dart';
 
-class NewsScreen extends StatelessWidget {
+class NewsScreen extends StatefulWidget {
   NewsScreen({Key? key}) : super(key: key);
 
-  final List<News> newsList = [
-    News(
-      id: 40813,
-      title: "Meeting in person at the FIRST Oslo Technical Colloquium",
-      summary:
-          "Last month, I was honored to be one of the planners and participants of the FIRST Technical Colloquium (TC) in Norway. Organized by FIRST members, the event was held just outside of Oslo at the Telenor Expo, Telenor headquarters in Fornebu.\n",
-      link:
-          "https://www.first.org/blog/20211129-meeting_person_first_oslo_technical_colloquium",
-      published: "Tue, 07 Dec 2021 17:00:00 GMT",
-    ),
-    News(
-      id: 40813,
-      title: "Meeting in person at the FIRST Oslo Technical Colloquium",
-      summary:
-          "Last month, I was honored to be one of the planners and participants of the FIRST Technical Colloquium (TC) in Norway. Organized by FIRST members, the event was held just outside of Oslo at the Telenor Expo, Telenor headquarters in Fornebu.\n",
-      link:
-          "https://www.first.org/blog/20211129-meeting_person_first_oslo_technical_colloquium",
-      published: "Tue, 07 Dec 2021 17:00:00 GMT",
-    ),
-  ];
+  @override
+  State<NewsScreen> createState() => _NewsScreenState();
+}
+
+class _NewsScreenState extends State<NewsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    loadNews();
+  }
+
+  List<News> allNews = [];
+
+  int currentIndex = 0;
+
+  loadNews() async {
+    var currentNews = await getNews();
+    for (int i = 0; i < currentNews['data'].length; i++) {
+      News news = News(
+        id: currentNews['data'][i]['id'] ?? 'not provided',
+        title: currentNews['data'][i]['title'] ?? 'not provided',
+        summary: currentNews['data'][i]['summary'] ?? 'not provided',
+        link: currentNews['data'][i]['link'] ?? 'not provided',
+        published: currentNews['data'][i]['published'] ?? 'not provided',
+      );
+
+      allNews.add(news);
+    }
+
+    // String title = currentNews['data'][3]['title'];
+    // print(currentNews['data'].length);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add_link_sharp),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => OnlineNews()),
+              );
+            },
+          )
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: currentIndex,
+        onTap: (index) => setState(() => currentIndex = index),
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+            backgroundColor: Colors.blue,
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite),
+            label: 'Favorite',
+            backgroundColor: Colors.blue,
+          ),
+        ],
+      ),
       body: ListView.builder(
-        itemCount: newsList.length,
+        itemCount: allNews.length,
         itemBuilder: (context, index) {
           return ClipRRect(
             borderRadius: BorderRadius.circular(36),
@@ -52,13 +94,24 @@ class NewsScreen extends StatelessWidget {
               child: ListTile(
                 leading: IconButton(
                   icon: const Icon(Icons.favorite),
-                  onPressed: () {},
+                  color: allNews[index].isFavorite == true
+                      ? Colors.red
+                      : Colors.grey,
+                  onPressed: () {
+                    setState(() {
+                      if (allNews[index].isFavorite == false) {
+                        allNews[index].isFavorite = true;
+                      } else {
+                        allNews[index].isFavorite = false;
+                      }
+                    });
+                  },
                 ),
                 title: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      newsList[index].title,
+                      allNews[index].title,
                       maxLines: 2,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
@@ -68,7 +121,7 @@ class NewsScreen extends StatelessWidget {
                       height: 6,
                     ),
                     Text(
-                      newsList[index].summary,
+                      allNews[index].summary,
                       maxLines: 2,
                       style: const TextStyle(color: Colors.black87),
                     ),
@@ -76,7 +129,7 @@ class NewsScreen extends StatelessWidget {
                       height: 6,
                     ),
                     Text(
-                      newsList[index].published,
+                      allNews[index].published,
                       maxLines: 2,
                       style: const TextStyle(color: Colors.grey),
                     ),

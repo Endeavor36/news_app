@@ -1,24 +1,15 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import '../models/news.dart';
+String newsUrl = 'https://api.first.org/data/v1/news';
 
-Future<List<News>> getNews() async {
-  String newsUrl = 'https://api.first.org/data/v1/news';
-  final response = await http.get(Uri.parse(newsUrl));
+Future<dynamic> getNews() async {
+  http.Response response = await http.get(Uri.parse(newsUrl));
 
-  var responseData = json.decode(response.body);
-
-  List<News> news = [];
-  for (var singleNews in responseData) {
-    News n = News(
-      id: singleNews['data']['id'],
-      link: singleNews['data']['link'],
-      published: singleNews['data']['published'],
-      summary: singleNews['data']['summary'],
-      title: singleNews['data']['title'],
-    );
-    news.add(n);
+  if (response.statusCode == 200) {
+    var body = response.body;
+    return jsonDecode(body);
+  } else {
+    print('Failed to load data.');
   }
-  return news;
 }
